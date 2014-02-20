@@ -52,6 +52,8 @@ class WSU_Versions {
 	public function __construct() {
 		add_action( 'transition_post_status', array( $this, 'transition_post_status' ), 10, 3 );
 		add_action( 'add_meta_boxes',         array( $this, 'add_meta_boxes'         ), 10, 2 );
+		add_action( 'admin_enqueue_scripts',  array( $this, 'admin_enqueue_scripts'  )        );
+		add_action( 'wp_ajax_create_fork',    array( $this, 'ajax_create_fork'       )        );
 	}
 
 	/**
@@ -61,7 +63,70 @@ class WSU_Versions {
 	 * @param WP_post $post      Contains properties of a piece of content.
 	 */
 	public function add_meta_boxes( $post_type, $post ) {
-		add_meta_box( 'wsu-versions-meta', 'Versions and Form', array( $this, 'display_versions_box' ), null, 'side', 'default' );
+		add_meta_box( 'wsu-versions-meta', 'Versions', array( $this, 'display_versions_box' ), null, 'side', 'default' );
+	}
+
+	/**
+	 * Enqueue scripts used in the admin.
+	 */
+	public function admin_enqueue_scripts() {
+		if ( 'post' === get_current_screen()->base ) {
+			wp_enqueue_script( 'wsu-versions-admin', plugins_url( '/js/wsu-versions-admin.js', __FILE__ ), array( 'jquery' ), false, true );
+		}
+	}
+
+	/**
+	 * Handle an AJAX request to create a fork from an original piece of content.
+	 */
+	public function ajax_create_fork() {
+		check_ajax_referer( 'wsu-versions-fork' );
+		$original_unique_id = $_POST['version_id'];
+
+		$post = $this->get_post_by_version( $original_unique_id );
+
+		$fork_post = $post;
+		unset( $fork_post->ID );
+		$fork_post->post_name   = 'wsu-fork-' . $fork_post->post_name;
+		$fork_post->post_status = 'private';
+
+		$fork_post_id = wp_insert_post( $fork_post );
+
+		if ( is_wp_error( $fork_post_id ) ) {
+			$response = array( 'error' => $fork_post_id->get_error_message() );
+		} else {
+			update_post_meta( $fork_post_id, $this->is_fork_meta_key, absint( $fork_post_id ) );
+			$response = array( 'success' => $fork_post_id );
+		}
+
+		echo json_encode( $response );
+		die();
+	}
+
+	/**
+	 * Get a post object based on a unique ID.
+	 *
+	 * @param string $unique_id The hashed unique ID of a piece of content.
+	 *
+	 * @return bool|WP_Post False if a post does not exist. A WP_Post object if it does.
+	 */
+	public function get_post_by_version( $unique_id ) {
+		global $wpdb;
+
+		if ( empty( $unique_id ) ) {
+			return false;
+		}
+
+		$post = $wpdb->get_row( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = %s AND meta_value = %s", $this->unique_id_meta_key, $unique_id ) );
+
+		if ( isset( $post->post_id ) ) {
+			$post = get_post( $post->post_id );
+
+			if ( null !== $post ) {
+				return $post;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -70,8 +135,8 @@ class WSU_Versions {
 	 * @param WP_Post $post Current post's object=.
 	 */
 	public function display_versions_box( $post ) {
-		//$unique_id = $this->get_unique_id( $post );
-		//echo 'Unique ID: <input readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
+		$unique_id = $this->get_unique_id( $post );
+		echo 'Unique ID: <input id="wsu-version-id" readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
 
 		if ( $this->is_fork( $post ) ) {
 			$template  = $this->get_template(  $post );
@@ -79,12 +144,14 @@ class WSU_Versions {
 				<option value="' . esc_attr( $template ) . '">' . esc_html( $template ) . '</option>
 				</select>';
 		} else {
+			$ajax_nonce = wp_create_nonce( 'wsu-versions-fork' );
 			?><p class="description">This is an original piece of content.</p>
 			<label for="wsu_versions_fork_location">Fork Location:</label>
-			<select name="wsu_versions_fork_location">
+			<select id="wsu-fork-location" name="wsu_versions_fork_location">
 				<option value="production">Current Site</option>
 			</select>
-			<a class="button-secondary" href="">Fork</a><?php
+			<input type="hidden" id="wsu-versions-fork-nonce" value="<?php echo esc_attr( $ajax_nonce ); ?>" />
+			<span id="wsu-create-fork" class="button-secondary">Fork</span><?php
 		}
 	}
 
