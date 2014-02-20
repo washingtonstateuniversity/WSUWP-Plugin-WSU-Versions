@@ -42,6 +42,11 @@ class WSU_Versions {
 	var $template_meta_key = '_wsu_versions_template';
 
 	/**
+	 * @var string Meta key used to determine if this version is a fork.
+	 */
+	var $is_fork_meta_key = '_wsu_versions_is_fork';
+
+	/**
 	 * Setup the hooks used by the plugin.
 	 */
 	public function __construct() {
@@ -66,10 +71,22 @@ class WSU_Versions {
 	 */
 	public function display_versions_box( $post ) {
 		$unique_id = $this->get_unique_id( $post );
-		$template  = $this->get_template(  $post );
 
-		echo 'Unique ID: <input readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
-		echo 'Template: ' . esc_html( $template );
+		//echo 'Unique ID: <input readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
+
+		if ( $this->is_fork( $post ) ) {
+			$template  = $this->get_template(  $post );
+			echo 'Template: <select name="wsu_versions_fork_template">
+				<option value="' . esc_attr( $template ) . '">' . esc_html( $template ) . '</option>
+				</select>';
+		} else {
+			?><p class="description">This is an original piece of content.</p>
+			<label for="wsu_versions_fork_location">Fork Location:</label>
+			<select name="wsu_versions_fork_location">
+				<option value="production">Current Site</option>
+			</select>
+			<a class="button-secondary" href="">Fork</a><?php
+		}
 	}
 
 	/**
@@ -141,5 +158,25 @@ class WSU_Versions {
 		return $current_form;
 	}
 
+	/**
+	 * Determine if a piece of content is a fork.
+	 *
+	 * @param int|WP_Post $post Post ID or object.
+	 *
+	 * @return bool True if a fork. False if not.
+	 */
+	private function is_fork( $post ) {
+		if ( is_object( $post ) ) {
+			$post = $post->ID;
+		}
+
+		$is_fork = get_post_meta( $post, $this->is_fork_meta_key, true );
+
+		if ( empty( $is_fork ) ) {
+			return false;
+		}
+
+		return true;
+	}
 }
 $wsu_versions = new WSU_Versions();
