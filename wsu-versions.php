@@ -80,7 +80,7 @@ class WSU_Versions {
 	 */
 	public function ajax_create_fork() {
 		check_ajax_referer( 'wsu-versions-fork' );
-		$original_unique_id = $_POST['version_id'];
+		$original_unique_id = sanitize_key( $_POST['version_id'] );
 
 		$post = $this->get_post_by_version( $original_unique_id );
 
@@ -94,7 +94,7 @@ class WSU_Versions {
 		if ( is_wp_error( $fork_post_id ) ) {
 			$response = array( 'error' => $fork_post_id->get_error_message() );
 		} else {
-			update_post_meta( $fork_post_id, $this->is_fork_meta_key, absint( $fork_post_id ) );
+			update_post_meta( $fork_post_id, $this->is_fork_meta_key, $original_unique_id );
 			$response = array( 'success' => $fork_post_id );
 		}
 
