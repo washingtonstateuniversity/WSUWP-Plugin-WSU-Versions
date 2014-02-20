@@ -37,6 +37,11 @@ class WSU_Versions {
 	var $unique_id_meta_key = '_wsu_versions_uid';
 
 	/**
+	 * @var string The meta key used to track the template assigned to a piece of content.
+	 */
+	var $template_meta_key = '_wsu_versions_template';
+
+	/**
 	 * Setup the hooks used by the plugin.
 	 */
 	public function __construct() {
@@ -80,7 +85,8 @@ class WSU_Versions {
 	}
 
 	/**
-	 * Generate a unique version ID for a piece of content.
+	 * Generate a unique version ID for a piece of content and store the current
+	 * template in use when the content version was created.
 	 *
 	 * @param int|object $post Post ID or post object.
 	 */
@@ -89,9 +95,11 @@ class WSU_Versions {
 			$post = get_post( $post );
 		}
 
-		$unique_id = md5( $post->post_name . time() . $post->ID );
+		$unique_id    = md5( $post->post_name . time() . $post->ID );
+		$current_form = sanitize_key( get_template() );
 
-		update_post_meta( $post->ID, $this->unique_id_meta_key, $unique_id );
+		update_post_meta( $post->ID, $this->unique_id_meta_key, $unique_id    );
+		update_post_meta( $post->ID, $this->template_meta_key,  $current_form );
 	}
 
 }
