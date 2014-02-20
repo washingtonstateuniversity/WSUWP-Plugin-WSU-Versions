@@ -44,7 +44,11 @@ class WSU_Versions {
 	}
 
 	/**
-	 * Fires when updating or saving a post.
+	 * Fires when updating or saving a piece of content.
+	 *
+	 * @param string  $new_status Contains new status of content.
+	 * @param string  $old_status Contains old status of content.
+	 * @param WP_Post $post       A post object of the content's main properties.
 	 */
 	public function transition_post_status( $new_status, $old_status, $post ) {
 		if ( 'inherit' === $post->post_status ) {
