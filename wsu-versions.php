@@ -80,7 +80,7 @@ class WSU_Versions {
 	 * @param WP_Post $post       A post object of the content's main properties.
 	 */
 	public function transition_post_status( $new_status, $old_status, $post ) {
-		if ( 'inherit' === $post->post_status ) {
+		if ( in_array( $post->post_status, array( 'inherit', 'auto-draft' ) ) ) {
 			return;
 		}
 
