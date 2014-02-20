@@ -70,8 +70,7 @@ class WSU_Versions {
 	 * @param WP_Post $post Current post's object=.
 	 */
 	public function display_versions_box( $post ) {
-		$unique_id = $this->get_unique_id( $post );
-
+		//$unique_id = $this->get_unique_id( $post );
 		//echo 'Unique ID: <input readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
 
 		if ( $this->is_fork( $post ) ) {
