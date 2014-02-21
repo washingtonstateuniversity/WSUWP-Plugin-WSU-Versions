@@ -170,6 +170,7 @@ class WSU_Versions {
 			?>
 			<input type="hidden" id="wsu-versions-post-id"    value="<?php echo get_the_ID(); ?>" />
 			<input type="hidden" id="wsu-versions-fork-nonce" value="<?php echo esc_attr( $ajax_nonce ); ?>" />
+			<div id="wsu-versions-response"></div>
 			<span id="wsu-update-fork" class="button-secondary">Update Fork</span>
 			<?php
 		} else {

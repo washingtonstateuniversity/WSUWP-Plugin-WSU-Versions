@@ -21,8 +21,18 @@
 
 			// Make the ajax call
 			$.post( window.ajaxurl, data, function( response ) {
-				process_response( response );
-			} );
+				if ( '-1' == response ) {
+					return; // nonce error
+				}
+
+				response = $.parseJSON( response );
+
+				if ( response.success ) {
+					var post_id = response.success;
+				} else {
+					var error = response.error;
+				}
+			});
 		}
 	}
 
@@ -35,22 +45,14 @@
 		};
 
 		$.post( window.ajaxurl, data, function( response ) {
-			process_response( response );
+			if ( '-1' == response ) {
+				return; // nonce error.
+			}
+
+			response = $.parseJSON( response );
+
+			$( '#wsu-versions-response' ).addClass('updated' ).text( 'Template changed.' );
 		});
-	}
-
-	function process_response( response ) {
-		if ( '-1' == response ) {
-			return; // error
-		}
-
-		response = $.parseJSON( response );
-
-		if ( response.success ) {
-			var post_id = response.success;
-		} else {
-			var error = response.error;
-		}
 	}
 
 	$( '#wsu-versions-meta' ).on( 'click', '.button-secondary', handle_click );
