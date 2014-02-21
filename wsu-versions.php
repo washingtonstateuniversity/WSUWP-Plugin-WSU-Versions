@@ -316,6 +316,31 @@ class WSU_Versions {
 	}
 
 	/**
+	 * Return the original post object for a forked piece of content.
+	 *
+	 * @param int|WP_Post $post The fork's post ID or object.
+	 *
+	 * @return WP_Post The original's post object.
+	 */
+	public function get_original_post( $post ) {
+		if ( is_object( $post ) ) {
+			$post = $post->ID;
+		}
+
+		$original_unique_id = get_post_meta( $post, $this->is_fork_meta_key, true );
+
+		if ( empty( $original_unique_id ) ) {
+			$post = get_post( $post );
+
+			return $post;
+		}
+
+		$post = $this->get_post_by_version( $original_unique_id );
+
+		return $post;
+	}
+
+	/**
 	 * Determine if a piece of content is a fork.
 	 *
 	 * @param int|WP_Post $post Post ID or object.
