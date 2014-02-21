@@ -211,7 +211,8 @@ class WSU_Versions {
 			</div>
 			<?php
 		} else {
-			echo 'Unique ID: <input id="wsu-version-id" readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
+			echo '<p class="description">This is an original piece of content. Available forks are listed below.</p>';
+			echo '<p><strong>Content ID:</strong> ' . esc_html( $unique_id ) . '</p>';
 			$fork_ids   = $this->get_forks( $unique_id );
 
 			if ( ! empty( $fork_ids ) ) {
@@ -222,12 +223,17 @@ class WSU_Versions {
 				echo '</ul>';
 			}
 			?>
-			<label for="wsu_versions_fork_location">Fork Location:</label>
+			<label for="wsu_versions_fork_location"><strong>Fork Location:</strong></label>
 			<select id="wsu-fork-location" name="wsu_versions_fork_location">
 				<option value="production">Current Site</option>
 			</select>
 			<input type="hidden" id="wsu-versions-fork-nonce" value="<?php echo esc_attr( $ajax_nonce ); ?>" />
-			<span id="wsu-create-fork" class="button-secondary">Create Fork</span>
+			<input type="hidden" id="wsu-version-id"          value="<?php echo esc_attr( $unique_id  ); ?>" />
+			<div id="wsu-versions-response"></div>
+			<div id="wsu-versions-actions">
+				<span id="wsu-create-fork" class="button-secondary">Create Fork</span>
+				<div class="clear"></div>
+			</div>
 			<?php
 		}
 		echo '</div>';

@@ -2,6 +2,7 @@
 	display: none;
 }
 
+#wsu-create-fork,
 #wsu-update-fork {
 	float: right;
 }
