@@ -1,5 +1,14 @@
 <?php
 /**
+Plugin Name: WSU Versions - Template Filter
+Description: Used in combination with WSU Versions, filters the template and stylesheet on demand.
+Author:      washingtonstateuniversity, jeremyfelt
+Version:     0.1
+Plugin URI:  http://github.com/washingtonstateuniversity/wsuwp-plugin-wsu-versions/
+License:     GPLv2 or Later
+ */
+
+/**
  * Hackity hack, don't look back.
  */
 
