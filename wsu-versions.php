@@ -55,6 +55,10 @@ class WSU_Versions {
 		add_action( 'admin_enqueue_scripts',  array( $this, 'admin_enqueue_scripts'  )        );
 		add_action( 'wp_ajax_create_fork',    array( $this, 'ajax_create_fork'       )        );
 		add_action( 'wp_ajax_update_fork',    array( $this, 'ajax_update_fork'       )        );
+
+		add_filter( 'page_link',              array( $this, 'post_type_link'         ), 10, 3 );
+		add_filter( 'post_link',              array( $this, 'post_type_link'         ), 10, 3 );
+		add_filter( 'post_type_link',         array( $this, 'post_type_link'         ), 10, 3 );
 	}
 
 	/**
@@ -144,6 +148,23 @@ class WSU_Versions {
 		return false;
 	}
 
+	public function post_type_link( $link, $post, $sample ) {
+		if ( is_object( $post ) ) {
+			$post = $post->ID;
+		}
+
+		$template = false;
+
+		if ( $this->is_fork( $post ) ) {
+			$template = $this->get_template( $post );
+		}
+
+		if ( $template ) {
+			$link = add_query_arg( array( 'wsu-versions-template' => $template ), $link );
+		}
+
+		return $link;
+	}
 	/**
 	 * Display a meta box containing WSU Versions information.
 	 *
