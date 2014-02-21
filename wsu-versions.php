@@ -182,12 +182,16 @@ class WSU_Versions {
 		$unique_id  = $this->get_unique_id( $post );
 		$ajax_nonce = wp_create_nonce( 'wsu-versions-fork' );
 		echo '<div class="submitbox" >';
-		echo 'Unique ID: <input id="wsu-version-id" readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
 
 		if ( $this->is_fork( $post ) ) {
 			$available_templates = WP_Theme::get_allowed();
 			$current_template  = $this->get_template(  $post );
 
+			$original_post           = $this->get_original_post( $post );
+			$original_post_link      = get_permalink( $original_post->ID );
+			$original_edit_post_link = get_edit_post_link( $original_post->ID );
+
+			echo '<p class="description">This is a forked version of ' . esc_html( $original_post->post_title ) . '.</p><p><a href="' . esc_url( $original_edit_post_link ) . '">Edit</a> or <a target="_blank" href="' . esc_url( $original_post_link ) . '">view</a> the original. </p>';
 			echo 'Template: <select id="wsu-fork-template" name="wsu_versions_fork_template">';
 
 			foreach ( $available_templates as $template => $enabled ) {
@@ -206,6 +210,7 @@ class WSU_Versions {
 			</div>
 			<?php
 		} else {
+			echo 'Unique ID: <input id="wsu-version-id" readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
 			$fork_ids   = $this->get_forks( $unique_id );
 
 			if ( ! empty( $fork_ids ) ) {
