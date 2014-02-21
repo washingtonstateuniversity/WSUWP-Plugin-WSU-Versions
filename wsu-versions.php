@@ -54,6 +54,7 @@ class WSU_Versions {
 		add_action( 'add_meta_boxes',         array( $this, 'add_meta_boxes'         ), 10, 2 );
 		add_action( 'admin_enqueue_scripts',  array( $this, 'admin_enqueue_scripts'  )        );
 		add_action( 'wp_ajax_create_fork',    array( $this, 'ajax_create_fork'       )        );
+		add_action( 'wp_ajax_update_fork',    array( $this, 'ajax_update_fork'       )        );
 	}
 
 	/**
@@ -103,6 +104,20 @@ class WSU_Versions {
 	}
 
 	/**
+	 * Update properties of the forked content.
+	 */
+	public function ajax_update_fork() {
+		check_ajax_referer( 'wsu-versions-fork' );
+		$fork_post_id = absint( $_POST['fork_post_id'] );
+		$fork_template = sanitize_key( $_POST['fork_template'] );
+
+		update_post_meta( $fork_post_id, $this->template_meta_key, $fork_template );
+
+		echo json_encode( array( 'success' => $fork_template ) );
+		die();
+	}
+
+	/**
 	 * Get a post object based on a unique ID.
 	 *
 	 * @param string $unique_id The hashed unique ID of a piece of content.
@@ -135,22 +150,29 @@ class WSU_Versions {
 	 * @param WP_Post $post Current post's object=.
 	 */
 	public function display_versions_box( $post ) {
-		$unique_id = $this->get_unique_id( $post );
+		$unique_id  = $this->get_unique_id( $post );
+		$ajax_nonce = wp_create_nonce( 'wsu-versions-fork' );
+
 		echo 'Unique ID: <input id="wsu-version-id" readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
 
 		if ( $this->is_fork( $post ) ) {
 			$available_templates = WP_Theme::get_allowed();
 			$current_template  = $this->get_template(  $post );
 
-			echo 'Template: <select name="wsu_versions_fork_template">';
+			echo 'Template: <select id="wsu-fork-template" name="wsu_versions_fork_template">';
 
 			foreach ( $available_templates as $template => $enabled ) {
 				echo '<option value="' . esc_attr( $template ) . '" ' . selected( $template, $current_template, true ) . '">' . esc_html( $template ) . '</option>';
 			}
 
 			echo '</select>';
+
+			?>
+			<input type="hidden" id="wsu-versions-post-id"    value="<?php echo get_the_ID(); ?>" />
+			<input type="hidden" id="wsu-versions-fork-nonce" value="<?php echo esc_attr( $ajax_nonce ); ?>" />
+			<span id="wsu-update-fork" class="button-secondary">Update Fork</span>
+			<?php
 		} else {
-			$ajax_nonce = wp_create_nonce( 'wsu-versions-fork' );
 			$fork_ids   = $this->get_forks( $unique_id );
 
 			if ( ! empty( $fork_ids ) ) {
@@ -166,7 +188,7 @@ class WSU_Versions {
 				<option value="production">Current Site</option>
 			</select>
 			<input type="hidden" id="wsu-versions-fork-nonce" value="<?php echo esc_attr( $ajax_nonce ); ?>" />
-			<span id="wsu-create-fork" class="button-secondary">Fork</span>
+			<span id="wsu-create-fork" class="button-secondary">Create Fork</span>
 			<?php
 		}
 	}
