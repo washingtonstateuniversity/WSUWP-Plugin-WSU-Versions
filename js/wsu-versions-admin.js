@@ -51,10 +51,13 @@
 
 			response = $.parseJSON( response );
 
-			$( '#wsu-versions-response' ).addClass('updated' ).text( 'Template changed.' );
+			$( '#wsu-versions-response' ).addClass('updated' ).html( 'Template changed. <a target="_blank" href="' + response.preview + '">Preview</a> this fork.</a>' );
 			$( '#post-preview' ).attr( 'href', response.preview );
 		});
 	}
 
 	$( '#wsu-versions-meta' ).on( 'click', '.button-secondary', handle_click );
+	$( '#wsu-fork-template' ).on( 'change', function() {
+		$( '#wsu-versions-response' ).removeClass( 'updated' ).text( '' );
+	});
 }( jQuery, window ) );
