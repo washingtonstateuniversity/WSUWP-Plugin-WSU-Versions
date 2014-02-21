@@ -15,7 +15,8 @@
 	padding: 0;
 }
 
-#wsu-versions-meta .inside p {
+#wsu-versions-meta .inside p,
+#wsu-versions-meta .inside ul {
 	padding-left: 10px;
 	padding-right: 10px;
 }

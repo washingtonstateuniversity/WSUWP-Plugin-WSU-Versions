@@ -101,7 +101,12 @@ class WSU_Versions {
 			$response = array( 'error' => $fork_post_id->get_error_message() );
 		} else {
 			update_post_meta( $fork_post_id, $this->is_fork_meta_key, $original_unique_id );
-			$response = array( 'success' => $fork_post_id );
+			$fork_edit_link = esc_url( get_edit_post_link( $fork_post_id ) );
+
+			$response = array(
+				'success' => $fork_post_id,
+				'edit'    => $fork_edit_link,
+			);
 		}
 
 		echo json_encode( $response );
@@ -218,7 +223,7 @@ class WSU_Versions {
 			if ( ! empty( $fork_ids ) ) {
 				echo '<p><strong>Forks on Production:</strong></p><ul>';
 				foreach( $fork_ids as $fork_id ) {
-					echo '<li><a href="' . get_permalink( $fork_id ) . '">' . get_the_title( $fork_id ) . '</a></li>';
+					echo '<li>' . get_the_title( $fork_id ) . ' - <a target="_blank" href="' . get_permalink( $fork_id ) . '">preview</a> or <a href="' . get_edit_post_link( $fork_id ) . '">edit</a>.</li>';
 				}
 				echo '</ul>';
 			}

@@ -28,7 +28,7 @@
 				response = $.parseJSON( response );
 
 				if ( response.success ) {
-					var post_id = response.success;
+					$( '#wsu-versions-response' ).addClass( 'updated' ).html( 'Fork created. <a href="' + response.edit + '">Edit</a>' );
 				} else {
 					var error = response.error;
 				}
