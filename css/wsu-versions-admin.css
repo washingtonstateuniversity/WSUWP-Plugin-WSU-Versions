@@ -1,0 +1,20 @@
+#edit-slug-box {
+	display: none;
+}
+
+#wsu-update-fork {
+	float: right;
+}
+
+#wsu-versions-actions {
+	padding: 10px;
+}
+
+#wsu-versions-meta .inside {
+	padding: 0;
+}
+
+#wsu-versions-meta .inside p {
+	padding-left: 10px;
+	padding-right: 10px;
+}
