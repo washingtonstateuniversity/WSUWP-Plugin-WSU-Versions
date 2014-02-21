@@ -16,8 +16,22 @@
 
 			// Make the ajax call
 			$.post( window.ajaxurl, data, function( response ) {
-				console.log( response );
+				process_response( response );
 			} );
+		}
+	}
+
+	function process_response( response ) {
+		if ( '-1' == response ) {
+			return; // error
+		}
+
+		response = $.parseJSON( response );
+
+		if ( response.success ) {
+			var post_id = response.success;
+		} else {
+			var error = response.error;
 		}
 	}
 }( jQuery, window ) );
