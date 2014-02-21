@@ -60,4 +60,5 @@
 	$( '#wsu-fork-template' ).on( 'change', function() {
 		$( '#wsu-versions-response' ).removeClass( 'updated' ).text( '' );
 	});
+
 }( jQuery, window ) );

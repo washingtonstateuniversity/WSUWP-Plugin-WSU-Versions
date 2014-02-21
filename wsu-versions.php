@@ -77,6 +77,7 @@ class WSU_Versions {
 	public function admin_enqueue_scripts() {
 		if ( 'post' === get_current_screen()->base ) {
 			wp_enqueue_script( 'wsu-versions-admin', plugins_url( '/js/wsu-versions-admin.js', __FILE__ ), array( 'jquery' ), false, true );
+			wp_enqueue_style(  'wsu-versions-admin', plugins_url( '/css/wsu-versions-admin.css', __FILE__ ) );
 		}
 	}
 
@@ -180,7 +181,7 @@ class WSU_Versions {
 	public function display_versions_box( $post ) {
 		$unique_id  = $this->get_unique_id( $post );
 		$ajax_nonce = wp_create_nonce( 'wsu-versions-fork' );
-
+		echo '<div class="submitbox" >';
 		echo 'Unique ID: <input id="wsu-version-id" readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
 
 		if ( $this->is_fork( $post ) ) {
@@ -199,7 +200,10 @@ class WSU_Versions {
 			<input type="hidden" id="wsu-versions-post-id"    value="<?php echo get_the_ID(); ?>" />
 			<input type="hidden" id="wsu-versions-fork-nonce" value="<?php echo esc_attr( $ajax_nonce ); ?>" />
 			<div id="wsu-versions-response"></div>
-			<span id="wsu-update-fork" class="button-secondary">Update Fork</span>
+			<div id="wsu-versions-actions">
+				<span id="wsu-update-fork" class="button-secondary">Update Fork</span>
+				<div class="clear"></div>
+			</div>
 			<?php
 		} else {
 			$fork_ids   = $this->get_forks( $unique_id );
@@ -220,6 +224,7 @@ class WSU_Versions {
 			<span id="wsu-create-fork" class="button-secondary">Create Fork</span>
 			<?php
 		}
+		echo '</div>';
 	}
 
 	/**
