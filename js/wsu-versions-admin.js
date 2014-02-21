@@ -52,6 +52,7 @@
 			response = $.parseJSON( response );
 
 			$( '#wsu-versions-response' ).addClass('updated' ).text( 'Template changed.' );
+			$( '#post-preview' ).attr( 'href', response.preview );
 		});
 	}
 

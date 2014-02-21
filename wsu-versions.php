@@ -117,7 +117,14 @@ class WSU_Versions {
 
 		update_post_meta( $fork_post_id, $this->template_meta_key, $fork_template );
 
-		echo json_encode( array( 'success' => $fork_template ) );
+		$permalink = esc_url( get_permalink( $fork_post_id ) );
+
+		$response = array(
+			'success' => $fork_template,
+			'preview' => $permalink,
+		);
+
+		echo json_encode( $response );
 		die();
 	}
 
