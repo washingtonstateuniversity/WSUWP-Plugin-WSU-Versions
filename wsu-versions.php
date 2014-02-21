@@ -195,18 +195,20 @@ class WSU_Versions {
 			$original_post           = $this->get_original_post( $post );
 			$original_post_link      = get_permalink( $original_post->ID );
 			$original_edit_post_link = get_edit_post_link( $original_post->ID );
-
-			echo '<p class="description">This is a forked version of ' . esc_html( $original_post->post_title ) . '.</p><p><a href="' . esc_url( $original_edit_post_link ) . '">Edit</a> or <a target="_blank" href="' . esc_url( $original_post_link ) . '">view</a> the original. </p>';
-			echo '<label for="wsu_versions_fork_template"><strong>Theme:</strong></label>
-				<select id="wsu-fork-template" name="wsu_versions_fork_template">';
+			$template_options = '';
 
 			foreach ( $available_templates as $template => $enabled ) {
-				echo '<option value="' . esc_attr( $template ) . '" ' . selected( $template, $current_template, true ) . '">' . esc_html( $template ) . '</option>';
+				$template_options .= '<option value="' . esc_attr( $template ) . '" ' . selected( $template, $current_template, false) . '>' . esc_html( $template ) . '</option>';
 			}
 
-			echo '</select>';
-
 			?>
+
+			<p class="description">This is a forked version of <?php echo esc_html( $original_post->post_title ); ?></p>
+			<p><a href="<?php echo esc_url( $original_edit_post_link ); ?>">Edit</a> or <a target="_blank" href="<?php echo esc_url( $original_post_link ); ?>">view</a> the original. </p>
+			<label for="wsu_versions_fork_template"><strong>Theme:</strong></label>
+			<select id="wsu-fork-template" name="wsu_versions_fork_template">
+				<?php echo $template_options; ?>
+			</select>
 			<input type="hidden" id="wsu-versions-post-id"    value="<?php echo get_the_ID(); ?>" />
 			<input type="hidden" id="wsu-versions-fork-nonce" value="<?php echo esc_attr( $ajax_nonce ); ?>" />
 			<div id="wsu-versions-response"></div>
@@ -214,6 +216,7 @@ class WSU_Versions {
 				<span id="wsu-update-fork" class="button-secondary">Update Fork</span>
 				<div class="clear"></div>
 			</div>
+
 			<?php
 		} else {
 			echo '<p class="description">This is an original piece of content. Available forks are listed below.</p>';
