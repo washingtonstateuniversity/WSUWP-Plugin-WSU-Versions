@@ -1,0 +1,37 @@
+#edit-slug-box {
+	display: none;
+}
+
+#wsu-create-fork,
+#wsu-update-fork {
+	float: right;
+}
+
+#wsu-versions-actions {
+	padding: 10px;
+}
+
+#wsu-versions-meta .inside {
+	padding: 0;
+}
+
+#wsu-versions-meta .inside p,
+#wsu-versions-meta .inside ul {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+#wsu-versions-meta .inside label {
+	display: block;
+	width: 100%;
+	padding: 0 10px 5px 10px;
+}
+
+#wsu-versions-meta .inside select {
+	width: 258px;
+	margin: 0 0 0 10px;
+}
+
+#wsu-versions-response.updated {
+	margin: 15px 10px 0 10px;
+}

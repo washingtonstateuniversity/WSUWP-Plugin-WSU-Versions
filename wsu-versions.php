@@ -55,6 +55,10 @@ class WSU_Versions {
 		add_action( 'admin_enqueue_scripts',  array( $this, 'admin_enqueue_scripts'  )        );
 		add_action( 'wp_ajax_create_fork',    array( $this, 'ajax_create_fork'       )        );
 		add_action( 'wp_ajax_update_fork',    array( $this, 'ajax_update_fork'       )        );
+
+		add_filter( 'page_link',              array( $this, 'post_type_link'         ), 10, 3 );
+		add_filter( 'post_link',              array( $this, 'post_type_link'         ), 10, 3 );
+		add_filter( 'post_type_link',         array( $this, 'post_type_link'         ), 10, 3 );
 	}
 
 	/**
@@ -73,6 +77,7 @@ class WSU_Versions {
 	public function admin_enqueue_scripts() {
 		if ( 'post' === get_current_screen()->base ) {
 			wp_enqueue_script( 'wsu-versions-admin', plugins_url( '/js/wsu-versions-admin.js', __FILE__ ), array( 'jquery' ), false, true );
+			wp_enqueue_style(  'wsu-versions-admin', plugins_url( '/css/wsu-versions-admin.css', __FILE__ ) );
 		}
 	}
 
@@ -96,7 +101,12 @@ class WSU_Versions {
 			$response = array( 'error' => $fork_post_id->get_error_message() );
 		} else {
 			update_post_meta( $fork_post_id, $this->is_fork_meta_key, $original_unique_id );
-			$response = array( 'success' => $fork_post_id );
+			$fork_edit_link = esc_url( get_edit_post_link( $fork_post_id ) );
+
+			$response = array(
+				'success' => $fork_post_id,
+				'edit'    => $fork_edit_link,
+			);
 		}
 
 		echo json_encode( $response );
@@ -113,7 +123,14 @@ class WSU_Versions {
 
 		update_post_meta( $fork_post_id, $this->template_meta_key, $fork_template );
 
-		echo json_encode( array( 'success' => $fork_template ) );
+		$permalink = esc_url( get_permalink( $fork_post_id ) );
+
+		$response = array(
+			'success' => $fork_template,
+			'preview' => $permalink,
+		);
+
+		echo json_encode( $response );
 		die();
 	}
 
@@ -144,6 +161,23 @@ class WSU_Versions {
 		return false;
 	}
 
+	public function post_type_link( $link, $post, $sample ) {
+		if ( is_object( $post ) ) {
+			$post = $post->ID;
+		}
+
+		$template = false;
+
+		if ( $this->is_fork( $post ) ) {
+			$template = $this->get_template( $post );
+		}
+
+		if ( $template ) {
+			$link = add_query_arg( array( 'wsu-versions-template' => $template ), $link );
+		}
+
+		return $link;
+	}
 	/**
 	 * Display a meta box containing WSU Versions information.
 	 *
@@ -152,46 +186,65 @@ class WSU_Versions {
 	public function display_versions_box( $post ) {
 		$unique_id  = $this->get_unique_id( $post );
 		$ajax_nonce = wp_create_nonce( 'wsu-versions-fork' );
-
-		echo 'Unique ID: <input id="wsu-version-id" readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
+		echo '<div class="submitbox" >';
 
 		if ( $this->is_fork( $post ) ) {
 			$available_templates = WP_Theme::get_allowed();
 			$current_template  = $this->get_template(  $post );
 
-			echo 'Template: <select id="wsu-fork-template" name="wsu_versions_fork_template">';
+			$original_post           = $this->get_original_post( $post );
+			$original_post_link      = get_permalink( $original_post->ID );
+			$original_edit_post_link = get_edit_post_link( $original_post->ID );
+			$template_options = '';
 
 			foreach ( $available_templates as $template => $enabled ) {
-				echo '<option value="' . esc_attr( $template ) . '" ' . selected( $template, $current_template, true ) . '">' . esc_html( $template ) . '</option>';
+				$template_options .= '<option value="' . esc_attr( $template ) . '" ' . selected( $template, $current_template, false) . '>' . esc_html( $template ) . '</option>';
 			}
 
-			echo '</select>';
-
 			?>
+
+			<p class="description">This is a forked version of <?php echo esc_html( $original_post->post_title ); ?></p>
+			<p><a href="<?php echo esc_url( $original_edit_post_link ); ?>">Edit</a> or <a target="_blank" href="<?php echo esc_url( $original_post_link ); ?>">view</a> the original. </p>
+			<label for="wsu_versions_fork_template"><strong>Theme:</strong></label>
+			<select id="wsu-fork-template" name="wsu_versions_fork_template">
+				<?php echo $template_options; ?>
+			</select>
 			<input type="hidden" id="wsu-versions-post-id"    value="<?php echo get_the_ID(); ?>" />
 			<input type="hidden" id="wsu-versions-fork-nonce" value="<?php echo esc_attr( $ajax_nonce ); ?>" />
 			<div id="wsu-versions-response"></div>
-			<span id="wsu-update-fork" class="button-secondary">Update Fork</span>
+			<div id="wsu-versions-actions">
+				<span id="wsu-update-fork" class="button-secondary">Update Fork</span>
+				<div class="clear"></div>
+			</div>
+
 			<?php
 		} else {
+			echo '<p class="description">This is an original piece of content. Available forks are listed below.</p>';
+			echo '<p><strong>Content ID:</strong> ' . esc_html( $unique_id ) . '</p>';
 			$fork_ids   = $this->get_forks( $unique_id );
 
 			if ( ! empty( $fork_ids ) ) {
 				echo '<p><strong>Forks on Production:</strong></p><ul>';
 				foreach( $fork_ids as $fork_id ) {
-					echo '<li><a href="' . get_permalink( $fork_id ) . '">' . get_the_title( $fork_id ) . '</a></li>';
+					echo '<li>' . get_the_title( $fork_id ) . ' - <a target="_blank" href="' . get_permalink( $fork_id ) . '">preview</a> or <a href="' . get_edit_post_link( $fork_id ) . '">edit</a>.</li>';
 				}
 				echo '</ul>';
 			}
 			?>
-			<label for="wsu_versions_fork_location">Fork Location:</label>
+			<label for="wsu_versions_fork_location"><strong>Fork Location:</strong></label>
 			<select id="wsu-fork-location" name="wsu_versions_fork_location">
 				<option value="production">Current Site</option>
 			</select>
 			<input type="hidden" id="wsu-versions-fork-nonce" value="<?php echo esc_attr( $ajax_nonce ); ?>" />
-			<span id="wsu-create-fork" class="button-secondary">Create Fork</span>
+			<input type="hidden" id="wsu-version-id"          value="<?php echo esc_attr( $unique_id  ); ?>" />
+			<div id="wsu-versions-response"></div>
+			<div id="wsu-versions-actions">
+				<span id="wsu-create-fork" class="button-secondary">Create Fork</span>
+				<div class="clear"></div>
+			</div>
 			<?php
 		}
+		echo '</div>';
 	}
 
 	/**
@@ -280,6 +333,31 @@ class WSU_Versions {
 		}
 
 		return $fork_ids;
+	}
+
+	/**
+	 * Return the original post object for a forked piece of content.
+	 *
+	 * @param int|WP_Post $post The fork's post ID or object.
+	 *
+	 * @return WP_Post The original's post object.
+	 */
+	public function get_original_post( $post ) {
+		if ( is_object( $post ) ) {
+			$post = $post->ID;
+		}
+
+		$original_unique_id = get_post_meta( $post, $this->is_fork_meta_key, true );
+
+		if ( empty( $original_unique_id ) ) {
+			$post = get_post( $post );
+
+			return $post;
+		}
+
+		$post = $this->get_post_by_version( $original_unique_id );
+
+		return $post;
 	}
 
 	/**
