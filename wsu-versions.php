@@ -145,13 +145,23 @@ class WSU_Versions {
 				</select>';
 		} else {
 			$ajax_nonce = wp_create_nonce( 'wsu-versions-fork' );
-			?><p class="description">This is an original piece of content.</p>
+			$fork_ids   = $this->get_forks( $unique_id );
+
+			if ( ! empty( $fork_ids ) ) {
+				echo '<p><strong>Forks on Production:</strong></p><ul>';
+				foreach( $fork_ids as $fork_id ) {
+					echo '<li><a href="' . get_permalink( $fork_id ) . '">' . get_the_title( $fork_id ) . '</a></li>';
+				}
+				echo '</ul>';
+			}
+			?>
 			<label for="wsu_versions_fork_location">Fork Location:</label>
 			<select id="wsu-fork-location" name="wsu_versions_fork_location">
 				<option value="production">Current Site</option>
 			</select>
 			<input type="hidden" id="wsu-versions-fork-nonce" value="<?php echo esc_attr( $ajax_nonce ); ?>" />
-			<span id="wsu-create-fork" class="button-secondary">Fork</span><?php
+			<span id="wsu-create-fork" class="button-secondary">Fork</span>
+			<?php
 		}
 	}
 
@@ -222,6 +232,25 @@ class WSU_Versions {
 		$current_form = get_post_meta( $post, $this->template_meta_key, true );
 
 		return $current_form;
+	}
+
+	/**
+	 * Return a list of forks made from a single piece of original content.
+	 *
+	 * @param string $unique_id The uid assigned to the original content.
+	 *
+	 * @return array Empty or an array of post IDs.
+	 */
+	public function get_forks( $unique_id ) {
+		global $wpdb;
+
+		$fork_ids = $wpdb->get_results( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = %s AND meta_value = %s", $this->is_fork_meta_key, $unique_id ) );
+
+		if ( ! empty( $fork_ids ) ) {
+			$fork_ids = wp_list_pluck( $fork_ids, 'post_id' );
+		}
+
+		return $fork_ids;
 	}
 
 	/**
