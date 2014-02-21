@@ -139,10 +139,16 @@ class WSU_Versions {
 		echo 'Unique ID: <input id="wsu-version-id" readonly type="text" value="' . esc_attr( $unique_id ) . '" />';
 
 		if ( $this->is_fork( $post ) ) {
-			$template  = $this->get_template(  $post );
-			echo 'Template: <select name="wsu_versions_fork_template">
-				<option value="' . esc_attr( $template ) . '">' . esc_html( $template ) . '</option>
-				</select>';
+			$available_templates = WP_Theme::get_allowed();
+			$current_template  = $this->get_template(  $post );
+
+			echo 'Template: <select name="wsu_versions_fork_template">';
+
+			foreach ( $available_templates as $template => $enabled ) {
+				echo '<option value="' . esc_attr( $template ) . '" ' . selected( $template, $current_template, true ) . '">' . esc_html( $template ) . '</option>';
+			}
+
+			echo '</select>';
 		} else {
 			$ajax_nonce = wp_create_nonce( 'wsu-versions-fork' );
 			$fork_ids   = $this->get_forks( $unique_id );
