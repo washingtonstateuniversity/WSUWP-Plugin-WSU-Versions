@@ -60,7 +60,11 @@
 
 	function view_diff() {
 		var diff_html = $( '#wsu-versions-diff' ).html();
-		$( '.wrap' ).append( '<div id="wsu-versions-diff-display" class="diff">' + diff_html + '</div>' );
+		$( '.wrap' ).append( '<div id="wsu-versions-diff-display" class="diff"><span id="wsu-versions-close" class="media-modal-close">close</span>' + diff_html + '</div>' );
+
+		$( '#wsu-versions-close' ).on('click', function() {
+			$( '#wsu-versions-diff-display' ).remove();
+		} );
 	}
 
 	$( '#wsu-versions-meta' ).on( 'click', '.button-secondary', handle_click );
