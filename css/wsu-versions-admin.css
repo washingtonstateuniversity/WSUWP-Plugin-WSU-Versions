@@ -35,3 +35,27 @@
 #wsu-versions-response.updated {
 	margin: 15px 10px 0 10px;
 }
+
+#wsu-versions-diff {
+	display: none;
+}
+
+#wsu-versions-diff-display {
+	position: absolute;
+	top: 10px;
+	left: 0px;
+	padding: 50px;
+	background: #fff;
+	border: 1px solid #ccc;
+	z-index:999;
+	min-height: 500px;
+	max-width: 800px;
+}
+
+#wsu-versions-close {
+	cursor: pointer;
+}
+
+#wsu-versions-close:hover {
+	color: #0000cc;
+}

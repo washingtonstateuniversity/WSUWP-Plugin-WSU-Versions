@@ -197,6 +197,8 @@ class WSU_Versions {
 			$original_edit_post_link = get_edit_post_link( $original_post->ID );
 			$template_options = '';
 
+			$diff = wp_text_diff( $original_post->post_content, $post->post_content, array( 'show_split_view' => true ) );
+
 			foreach ( $available_templates as $template => $enabled ) {
 				$template_options .= '<option value="' . esc_attr( $template ) . '" ' . selected( $template, $current_template, false) . '>' . esc_html( $template ) . '</option>';
 			}
@@ -213,10 +215,11 @@ class WSU_Versions {
 			<input type="hidden" id="wsu-versions-fork-nonce" value="<?php echo esc_attr( $ajax_nonce ); ?>" />
 			<div id="wsu-versions-response"></div>
 			<div id="wsu-versions-actions">
+				<span id="wsu-view-diff" class="button-secondary">View Diff</span>
 				<span id="wsu-update-fork" class="button-secondary">Update Fork</span>
 				<div class="clear"></div>
 			</div>
-
+			<div id="wsu-versions-diff" class="diff"><?php echo $diff; ?></div>
 			<?php
 		} else {
 			echo '<p class="description">This is an original piece of content. Available forks are listed below.</p>';

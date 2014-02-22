@@ -5,6 +5,8 @@
 			create_fork();
 		} else if ( 'wsu-update-fork' === this.id ) {
 			update_fork();
+		} else if ( 'wsu-view-diff' === this.id ) {
+			view_diff();
 		}
 	}
 
@@ -54,6 +56,15 @@
 			$( '#wsu-versions-response' ).addClass('updated' ).html( 'Template changed. <a target="_blank" href="' + response.preview + '">Preview</a> this fork.</a>' );
 			$( '#post-preview' ).attr( 'href', response.preview );
 		});
+	}
+
+	function view_diff() {
+		var diff_html = $( '#wsu-versions-diff' ).html();
+		$( '.wrap' ).append( '<div id="wsu-versions-diff-display" class="diff"><span id="wsu-versions-close" class="media-modal-close">close</span>' + diff_html + '</div>' );
+
+		$( '#wsu-versions-close' ).on('click', function() {
+			$( '#wsu-versions-diff-display' ).remove();
+		} );
 	}
 
 	$( '#wsu-versions-meta' ).on( 'click', '.button-secondary', handle_click );
