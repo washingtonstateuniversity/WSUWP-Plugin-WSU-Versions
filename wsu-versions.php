@@ -59,6 +59,15 @@ class WSU_Versions {
 		add_filter( 'page_link',              array( $this, 'post_type_link'         ), 10, 3 );
 		add_filter( 'post_link',              array( $this, 'post_type_link'         ), 10, 3 );
 		add_filter( 'post_type_link',         array( $this, 'post_type_link'         ), 10, 3 );
+
+		/**
+		 * Hackity hack, don't look back.
+		 * This is likely a temporary solution. :)
+		 */
+		if ( isset( $_GET['wsu-versions-template'] ) ) {
+			add_filter( 'stylesheet', array( $this, 'stylesheet' ), 10 );
+			add_filter( 'template',   array( $this, 'template'   ), 10 );
+		}
 	}
 
 	/**
@@ -382,6 +391,26 @@ class WSU_Versions {
 		}
 
 		return true;
+	}
+
+	public function stylesheet( $stylesheet ) {
+		if (  ! isset( $_GET['wsu-versions-template'] ) ) {
+			return $stylesheet;
+		}
+
+		$stylesheet = sanitize_key( $_GET['wsu-versions-template'] );
+
+		return $stylesheet;
+	}
+
+	public function template( $template ) {
+		if ( ! isset( $_GET['wsu-versions-template'] ) ) {
+			return $template;
+		}
+
+		$template = sanitize_key( $_GET['wsu-versions-template'] );
+
+		return $template;
 	}
 }
 $wsu_versions = new WSU_Versions();
